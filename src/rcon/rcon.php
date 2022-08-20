@@ -80,13 +80,10 @@ class Rcon {
 
     // get response.
     $response_packet = $this->read_packet();
-    if ($response_packet['id'] == Rcon::PACKET_COMMAND)
+    if ($response_packet['id'] == Rcon::PACKET_COMMAND && $response_packet['type'] == Rcon::SERVERDATA_RESPONSE_VALUE)
     {
-      if ($response_packet['type'] == Rcon::SERVERDATA_RESPONSE_VALUE)
-      {
-        $this->last_response = $response_packet['body'];
-        return $response_packet['body'];
-      }
+      $this->last_response = $response_packet['body'];
+      return $response_packet['body'];
     }
 
     return false;
@@ -96,13 +93,10 @@ class Rcon {
     $this->write_packet(Rcon::PACKET_AUTHORIZE, Rcon::SERVERDATA_AUTH, $this->password);
     $response_packet = $this->read_packet();
 
-    if ($response_packet['type'] == Rcon::SERVERDATA_AUTH_RESPONSE)
+    if ($response_packet['type'] == Rcon::SERVERDATA_AUTH_RESPONSE && $response_packet['id'] == Rcon::PACKET_AUTHORIZE)
     {
-      if ($response_packet['id'] == Rcon::PACKET_AUTHORIZE)
-      {
-        $this->authorized = true;
-        return true;
-      }
+      $this->authorized = true;
+      return true;
     }
 
     $this->disconnect();
@@ -152,8 +146,7 @@ class Rcon {
     // currently, this script does not support multi-packet responses.
 
     $packet_data = fread($this->socket, $size);
-    $packet_pack = unpack("V1id/V1type/a*body", $packet_data);
 
-    return $packet_pack;
+    return unpack("V1id/V1type/a*body", $packet_data);
   }
 }
